@@ -1,11 +1,31 @@
-from .User import User
+from src.controllers.sqliteDB import SqliteDB
+
+from src.models.User import User
 
 class Users:
+    users = []
+    
+    datasource = None
+    
     def __init__(self):
-        self.users = []
+        pass
+    
+    def set_datasource(self, datasource: SqliteDB):
+        self.datasource = datasource
+        users = self.datasource.execute_select_query('SELECT * FROM users')
+        for user in users:
+            self.users.append(User(user[0], user[1], user[2], user[3], user[4], user[5]))
         
     def add(self, user: User):
         self.users.append(user)
+        self.datasource.execute_query('INSERT OR REPLACE INTO users (id, first_name, last_name, username, language_code, is_bot) VALUES (?, ?, ?, ?, ?, ?)', (
+            user.id,
+            user.first_name,
+            user.last_name or "",
+            user.username or "",
+            user.language_code or "",
+            user.is_bot or False
+        ))
         
     def get_users(self):
         return self.users

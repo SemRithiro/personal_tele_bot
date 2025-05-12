@@ -8,5 +8,8 @@ class User:
         self.language_code = language_code
         self.is_bot = is_bot
         
+    def __str__(self):
+        return f'{self.id} - {self.first_name} {self.last_name} ({self.username})'
+        
     def get_id(self):
         return self.id;
