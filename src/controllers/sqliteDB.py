@@ -12,10 +12,12 @@ class SqliteDB:
         self._create_user_table()
         
     def execute_select_query(self, query: str):
+        """Execute SELECT Query only"""
         self.cursor.execute(query)
         return self.cursor.fetchall()
     
     def execute_query(self, query: str, parameter):
+        """Execute INSERT and UPDATE Query"""
         self.cursor.execute(query, parameter)
         self.connection.commit()
 

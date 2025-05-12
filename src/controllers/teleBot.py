@@ -19,6 +19,7 @@ class TeleBot:
         self.users = Users()
     
     def set_datasource(self, datasource_: SqliteDB):
+        """Set custom datasource"""
         self.datasource = datasource_
         self.users.set_datasource(datasource=datasource_)
  
