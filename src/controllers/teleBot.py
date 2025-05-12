@@ -10,6 +10,14 @@ class TeleBot:
     application = None
     users = None
     
+    about_me_text = (
+            "🤖 <b>About This Bot</b>\n"
+            "This bot was developed using <b>Python</b> and the <i>python-telegram-bot</i> library.\n\n"
+            "👨‍💻 <b>Developer:</b> Sem Rithiro\n"
+            "📧 <b>Email:</b> rithiro@gmail.com\n"
+            "🌐 <b>Portfolio:</b> <a href='https://semrithiro.github.io/curriculumn_vitae'>semrithiro.github.io</a>"
+        )
+    
     def __init__(self, telegram_token_: str):
         self.application = ApplicationBuilder().token(token=telegram_token_).build()
         self.application.add_handler(CommandHandler(command='start', callback=self._start))
@@ -26,23 +34,17 @@ class TeleBot:
     async def _start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Start command message handler"""
         keyboard = [
-            ['Option 1', 'Option 2']
+            ['Contact me', 'About me'],
+            ['Exit']
         ]
-        
+
         await self._extract_user(update=update)
 
         await self._reply_text_keyboard_markup(update=update, text='Welcome! How can I help you today?', keyboard=keyboard )
         
     async def _about(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """About me command message handler"""
-        about_text = (
-            "🤖 <b>About This Bot</b>\n"
-            "This bot was developed using <b>Python</b> and the <i>python-telegram-bot</i> library.\n\n"
-            "👨‍💻 <b>Developer:</b> Sem Rithiro\n"
-            "📧 <b>Email:</b> rithiro@gmail.com\n"
-            "🌐 <b>Portfolio:</b> <a href='https://semrithiro.github.io/curriculumn_vitae'>semrithiro.github.io</a>"
-        )
-        await self._reply_text(update=update, text=about_text )
+        await self._reply_text(update=update, text=self.about_me_text )
         
     async def _reply_text (self, update: Update, text: str):
         """Reply text with HTML parse mode"""
@@ -57,7 +59,11 @@ class TeleBot:
     async def _handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Message options handler"""
         option = update.message.text
-        await self._reply_text(update=update, text=f'You sent {option}',)
+        
+        if option == 'About me':
+            await self._reply_text(update=update, text=self.about_me_text)
+        elif option == 'Exit':
+            await self._reply_text(update=update, text='Good bye!')
         
     async def _extract_user(self, update: Update):
         """Extract telegram user's information"""
