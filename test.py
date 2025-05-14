@@ -1,82 +1,55 @@
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
-
 CHOOSE_OPTION, ENTERING_TEXT = range(2)
-
-ABOUT_ME_TEXT = (
-            "🤖 <b>About This Bot</b>\n"
-            "This bot was developed using <b>Python</b> and the <i>python-telegram-bot</i> library.\n\n"
-            "👨‍💻 <b>Developer:</b> Sem Rithiro\n"
-            "📧 <b>Email:</b> rithiro@gmail.com\n"
-            "🌐 <b>Portfolio:</b> <a href='https://semrithiro.github.io/curriculumn_vitae'>semrithiro.github.io</a>"
-)
-
-OPTIONS = {
+options = {
     'Main': {
-        'url': None,
         'photo': None,
         'message': 'Welcome! How can I help you?',
         'options': {
             'Last News': {
-                'url': None,
                 'photo': None,
                 'message': 'latest news',
                 'options': {
                     'Progressive influencer Hasan Piker tells of detention at US airport': {
-                        'url': 'https://globalnation.inquirer.net/276848/progressive-influencer-hasan-piker-tells-of-detention-at-us-airport',
-                        'photo': None,
-                        'message': 'Progressive influencer Hasan Piker tells of detention at US airport',
+                        'photo': 'https://globalnation.inquirer.net/files/2025/05/Hasan-Piker.jpg',
+                        'message': 'WASHINGTON — A high-profile left-wing influencer and political commentator said Monday he was detained for hours by US border officials and interrogated about his political views. US citizen Hasan Piker — who has millions of followers on YouTube, Twitch and X, and been outspoken in his criticism of Israel — says he was held at',
                         'options': {}
                     },
                     'Trump calls US-China trade talks a \'total reset\' as both sides agree to pause tariffs for 90 days': {
-                        'url': 'https://newsable.asianetnews.com/world/trump-calls-us-china-trade-talks-a-total-reset-as-both-sides-agree-to-pause-tariffs-for-90-days-kmv/articleshow-1oe18xg',
-                        'photo': None,
-                        'message': 'Trump calls US-China trade talks a \'total reset\' as both sides agree to pause tariffs for 90 days',
+                        'photo': 'https://assets.nst.com.my/images/articles/house13_NSTfield_image_listing_featured_v2.var_1747103016.jpg',
+                        'message': 'Following trade talks in Geneva, the US and China agreed to pause reciprocal tariffs for 90 days. President Trump called it a “total reset”, noting improved relations and ongoing discussions to address long-term trade concerns.',
                         'options': {}
                     },
                 }
             },
             'Stock Prices': {
-                'url': None,
                 'photo': None,
                 'message': 'Please select stock',
                 'options': {
                     'AAPL': {
-                        'url': None,
                         'photo': None,
                         'message': 'AAPL',
                         'options': {}
                     },
                     'TSLA': {
-                        'url': None,
                         'photo': None,
                         'message': 'TSLA',
                         'options': {}
                     },
                     'META': {
-                        'url': None,
                         'photo': None,
                         'message': 'META',
                         'options': {}
                     },
                     'SBUX': {
-                        'url': None,
                         'photo': None,
                         'message': 'SBUX',
                         'options': {}
                     },
                     'GOOG': {
-                        'url': None,
                         'photo': None,
                         'message': 'GOOG',
                         'options': {}
                     },
                     'NKE': {
-                        'url': None,
                         'photo': None,
                         'message': 'NKE',
                         'options': {}
@@ -86,3 +59,28 @@ OPTIONS = {
         }
     }
 }
+
+def chunk_buttons(buttons):
+    total = len(buttons)
+    if total == 3:
+        return [buttons[:2], [buttons[2]]]
+    elif total % 3 == 0:
+        size = 3
+    elif total % 2 == 0:
+        size = 2
+    else:
+        size = 2
+    return [buttons[i:i+size] for i in range(0, total, size)]
+
+def get_option(options: dict = {}, breadcrumbs: list = []):
+    selected_options = options
+    for breadcrumb in breadcrumbs:
+        if breadcrumbs[-1] != breadcrumb:
+            selected_options = selected_options[breadcrumb]['options']
+        else:
+            selected_options = selected_options[breadcrumb]
+    return list(selected_options['options'].keys()), selected_options
+
+options_list, select_options = get_option(options=options, breadcrumbs=[])
+print(chunk_buttons(options_list))
+print(select_options)

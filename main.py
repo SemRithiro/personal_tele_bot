@@ -1,13 +1,8 @@
-from src.controllers.teleBot import TeleBot
-from src.controllers.sqliteDB import SqliteDB
+from src.controllers.telegram_bot import Telegram_Bot
 
 from src.configurations.app import TELEGRAM_BOT_TOKEN
 
 if __name__ == '__main__':
-    sqliteDb = SqliteDB()
-    
-    application = TeleBot(telegram_token_=TELEGRAM_BOT_TOKEN)
-    application.set_datasource(datasource_= sqliteDb)
-    
+    application = Telegram_Bot(telegram_token=TELEGRAM_BOT_TOKEN)
     application.run()
     

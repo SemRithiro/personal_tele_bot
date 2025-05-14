@@ -1,6 +1,6 @@
 import sqlite3
 
-class SqliteDB:
+class Sqlite_DB:
     connection = None
     cursor = None
     
