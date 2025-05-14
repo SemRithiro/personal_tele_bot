@@ -19,12 +19,12 @@ OPTIONS = {
     'Main': {
         'url': None,
         'photo': None,
-        'message': 'Welcome! How can I help you?',
+        'message': 'Here is what I can do.',
         'options': {
-            'Last News': {
+            'Latest News': {
                 'url': None,
                 'photo': None,
-                'message': 'latest news',
+                'message': 'Please select the news',
                 'options': {
                     'Progressive influencer Hasan Piker tells of detention at US airport': {
                         'url': 'https://globalnation.inquirer.net/276848/progressive-influencer-hasan-piker-tells-of-detention-at-us-airport',
@@ -43,7 +43,7 @@ OPTIONS = {
             'Stock Prices': {
                 'url': None,
                 'photo': None,
-                'message': 'Please select stock',
+                'message': 'Which one you interested in?',
                 'options': {
                     'AAPL': {
                         'url': None,

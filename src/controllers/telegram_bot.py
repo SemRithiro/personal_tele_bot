@@ -19,7 +19,7 @@ class Telegram_Bot:
         # self.application.add_handler(MessageHandler(filters=filters.CONTACT, callback=self._handle_contact))
         
         conv_handler = ConversationHandler(
-            entry_points=[CommandHandler(command='start', callback=self._handle_converation)],
+            entry_points=[CommandHandler(command='ability', callback=self._handle_converation)],
             states={
                 CHOOSE_OPTION: [MessageHandler(filters=filters.TEXT & ~filters.COMMAND, callback=self._handle_converation)]
             },
@@ -27,7 +27,9 @@ class Telegram_Bot:
         )
         
         self.application.add_handler(conv_handler);
+        self.application.add_handler(CommandHandler(command='start', callback=self._handle_welcome_message))
         self.application.add_handler(CommandHandler(command='about', callback=self._handle_about_me))
+        self.application.add_handler(CommandHandler(command='cancel', callback=self._handle_cancel_operation))
 
     async def _handle_extract_user_choice(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         breadcrumbs = context.user_data.get('BREADCRUMBS')
@@ -115,8 +117,18 @@ class Telegram_Bot:
         await update.message.reply_html(text='❌ Ivalid option. Please choose again.')
         return CHOOSE_OPTION
 
+    async def _handle_welcome_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        user = update.effective_user
+        await update.message.reply_html(text=f'Welcome {user.last_name}. How can I help you today!')
+        return ConversationHandler.END
+
     async def _handle_about_me(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_html(text=ABOUT_ME_TEXT)
+        return ConversationHandler.END
+        
+    async def _handle_cancel_operation(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        await update.message.reply_html(text='No active command to cancel. I wasn\'t doing anything anyway. Zzzzz...')
+        return ConversationHandler.END
     
     def run(self):
         """Start polling the Telegram Bot"""
