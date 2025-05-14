@@ -19,7 +19,7 @@ class Telegram_Bot:
         # self.application.add_handler(MessageHandler(filters=filters.CONTACT, callback=self._handle_contact))
         
         conv_handler = ConversationHandler(
-            entry_points=[CommandHandler(command='ability', callback=self._handle_converation)],
+            entry_points=[CommandHandler(command='menus', callback=self._handle_converation)],
             states={
                 CHOOSE_OPTION: [MessageHandler(filters=filters.TEXT & ~filters.COMMAND, callback=self._handle_converation)]
             },
@@ -35,8 +35,6 @@ class Telegram_Bot:
         breadcrumbs = context.user_data.get('BREADCRUMBS')
         if breadcrumbs == None:
             breadcrumbs = ['Main']
-        else:
-            pass
         return breadcrumbs
 
     async def _handle_converation(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -48,28 +46,43 @@ class Telegram_Bot:
                 
                 if user_choice.startswith('/'):
                     context.user_data['BREADCRUMBS'] = ['Main']
-                
+
                 breadcrumbs = await self._handle_extract_user_choice(update=update, context=context)
                 options_list, select_option = get_option(options=OPTIONS, breadcrumbs=breadcrumbs)
+
+                if user_choice == 'Cancel':
+                    await self._reply_message(update=update, text='Good bye!')
+                    return ConversationHandler.END
+                
+                if user_choice == 'Back':
+                    breadcrumbs = breadcrumbs[:-1]
+                    user_choice = breadcrumbs[-1]
 
                 if user_choice in options_list:
                     if not user_choice in breadcrumbs:
                         breadcrumbs.append(user_choice)
-                    elif breadcrumbs.index(user_choice) <= len(breadcrumbs):
+                    elif breadcrumbs.index(user_choice) < len(breadcrumbs):
                         breadcrumbs = breadcrumbs[:breadcrumbs.index(user_choice)]
+                    else:
+                        raise Exception('Invalid Option')
+
                 context.user_data['BREADCRUMBS'] = breadcrumbs
                 options_list, select_option = get_option(options=OPTIONS, breadcrumbs=breadcrumbs)
-                await self._reply_message(update=update, text=generate_html_message(select_option), options=options_list)
+                
+                await self._reply_message(update=update, text=generate_html_message(select_option), photo=select_option['photo'], options=options_list)
                 if len(options_list) > 0:
                     return CHOOSE_OPTION
                 else:
                     return ConversationHandler.END
 
-    async def _reply_message(self, update: Update, text: str, options: list = []):
+    async def _reply_message(self, update: Update, text: str, photo: str = None, options: list = []):
         keyboard = ReplyKeyboardRemove()
         if len(options) > 0:
             keyboard = ReplyKeyboardMarkup(keyboard=chunk_keyboard_markup_button(options), resize_keyboard=True)
-        await update.message.reply_html(text=text, reply_markup=keyboard)
+        if photo == None:
+            await update.message.reply_html(text=text, reply_markup=keyboard)
+        else:
+            await update.message.reply_photo(photo=photo, caption=text, parse_mode='HTML', reply_markup=keyboard)
 
     async def _handle_photo(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         user = update.effective_user

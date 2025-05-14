@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+NEWS_API_TOKEN = os.getenv('NEWS_API_TOKEN')
 
 CHOOSE_OPTION, ENTERING_TEXT = range(2)
 
