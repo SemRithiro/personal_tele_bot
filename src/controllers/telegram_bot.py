@@ -11,13 +11,13 @@ class Telegram_Bot:
     def __init__(self, telegram_token: str):
         """Initialize the Telegram Bot instance"""
         self.application = ApplicationBuilder().token(token=telegram_token).build()
-        
+
         # self.application.add_handler(MessageHandler(filters=filters.PHOTO, callback=self._handle_photo))
         # self.application.add_handler(MessageHandler(filters=filters.VIDEO, callback=self._handle_video))
         # self.application.add_handler(MessageHandler(filters=filters.Document.ALL, callback=self._handle_file))
         # self.application.add_handler(MessageHandler(filters=filters.LOCATION, callback=self._handle_location))
         # self.application.add_handler(MessageHandler(filters=filters.CONTACT, callback=self._handle_contact))
-        
+
         conv_handler = ConversationHandler(
             entry_points=[CommandHandler(command='menus', callback=self._handle_converation)],
             states={
@@ -25,13 +25,14 @@ class Telegram_Bot:
             },
             fallbacks=[MessageHandler(filters=filters.ALL, callback=self._handle_invalid_option)]
         )
-        
+
         self.application.add_handler(conv_handler);
         self.application.add_handler(CommandHandler(command='start', callback=self._handle_welcome_message))
         self.application.add_handler(CommandHandler(command='about', callback=self._handle_about_me))
         self.application.add_handler(CommandHandler(command='cancel', callback=self._handle_cancel_operation))
 
     async def _handle_extract_user_choice(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Extracting user choice"""
         breadcrumbs = context.user_data.get('BREADCRUMBS')
         if breadcrumbs == None:
             breadcrumbs = ['Main']
@@ -53,7 +54,7 @@ class Telegram_Bot:
                 if user_choice == 'Cancel':
                     await self._reply_message(update=update, text='Good bye!')
                     return ConversationHandler.END
-                
+
                 if user_choice == 'Back':
                     breadcrumbs = breadcrumbs[:-1]
                     user_choice = breadcrumbs[-1]
@@ -68,21 +69,27 @@ class Telegram_Bot:
 
                 context.user_data['BREADCRUMBS'] = breadcrumbs
                 options_list, select_option = get_option(options=OPTIONS, breadcrumbs=breadcrumbs)
-                
-                await self._reply_message(update=update, text=generate_html_message(select_option), photo=select_option['photo'], options=options_list)
+
+                await self._reply_message(
+                    update=update,
+                    text=generate_html_message(select_option),
+                    photo=select_option['photo'],
+                    options=options_list,
+                    specified_size=select_option['specified_size']
+                )
                 if len(options_list) > 0:
                     return CHOOSE_OPTION
                 else:
                     return ConversationHandler.END
 
-    async def _reply_message(self, update: Update, text: str, photo: str = None, options: list = []):
+    async def _reply_message(self, update: Update, text: str, photo: str = None, options: list = [], specified_size = None):
         keyboard = ReplyKeyboardRemove()
         if len(options) > 0:
-            keyboard = ReplyKeyboardMarkup(keyboard=chunk_keyboard_markup_button(options), resize_keyboard=True)
+            keyboard = ReplyKeyboardMarkup(keyboard=chunk_keyboard_markup_button(buttons=options, size=specified_size), resize_keyboard=True)
         if photo == None:
-            await update.message.reply_html(text=text, reply_markup=keyboard)
+            await update.message.reply_html(text=text, reply_to_message_id=update.message.message_id, reply_markup=keyboard)
         else:
-            await update.message.reply_photo(photo=photo, caption=text, parse_mode='HTML', reply_markup=keyboard)
+            await update.message.reply_photo(photo=photo, caption=text, reply_to_message_id=update.message.message_id, parse_mode='HTML', reply_markup=keyboard)
 
     async def _handle_photo(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         user = update.effective_user
@@ -127,19 +134,23 @@ class Telegram_Bot:
         await update.message.reply_html(text='Thanks you!')
 
     async def _handle_invalid_option(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Invalid option selected handler"""
         await update.message.reply_html(text='❌ Ivalid option. Please choose again.')
         return CHOOSE_OPTION
 
     async def _handle_welcome_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Welcome message handler"""
         user = update.effective_user
         await update.message.reply_html(text=f'Welcome {user.last_name}. How can I help you today!')
         return ConversationHandler.END
 
     async def _handle_about_me(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """About me message handler"""
         await update.message.reply_html(text=ABOUT_ME_TEXT)
         return ConversationHandler.END
         
     async def _handle_cancel_operation(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Cancel all operations handler"""
         await update.message.reply_html(text='No active command to cancel. I wasn\'t doing anything anyway. Zzzzz...')
         return ConversationHandler.END
     
